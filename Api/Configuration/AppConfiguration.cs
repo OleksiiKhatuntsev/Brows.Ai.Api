@@ -4,19 +4,16 @@ public static class AppConfiguration
 {
     public static WebApplication ConfigurePipeline(this WebApplication app, IConfiguration configuration)
     {
-        if (app is not null)
+        if (app.Environment.IsDevelopment())
         {
-            if (app.Environment.IsDevelopment())
-            {
-                app.ConfigureDevelopmentEnvironment();
-            }
-            else
-            {
-                app.ConfigureProductionEnvironment();
-            }
-
-            app.ConfigureCommonEnvironment(configuration);
+            app.ConfigureDevelopmentEnvironment();
         }
+        else
+        {
+            app.ConfigureProductionEnvironment();
+        }
+
+        app.ConfigureCommonEnvironment(configuration);
 
         return app;
     }
