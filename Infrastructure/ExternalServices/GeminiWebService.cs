@@ -1,8 +1,9 @@
-﻿namespace Infrastructure.ExternalServices;
-
+﻿
 using AutoGen.Core;
 using AutoGen.Gemini;
 using Domain.Interfaces.Infrastructure;
+
+namespace Infrastructure.ExternalServices;
 
 public class GeminiWebService(string apiKey) : IGeminiWebService
 {

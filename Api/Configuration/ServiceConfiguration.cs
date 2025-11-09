@@ -7,7 +7,8 @@ using Microsoft.Extensions.Options;
 
 public static class ServiceConfiguration
 {
-    public static void ConfigureAppSettings(IServiceCollection services,
+    public static void ConfigureAppSettings(
+        IServiceCollection services,
         IConfiguration configuration)
     {
         services.Configure<GeminiSettings>(
@@ -15,17 +16,41 @@ public static class ServiceConfiguration
         );
     }
 
-    public static void RegisterServices(IServiceCollection services,
+    public static void RegisterServices(
+        IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddControllers();
+        services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+            });
         services.AddOpenApi();
         services.AddSwaggerGen();
-        
+
+        // In your Program.cs or Startup.cs
+        services.AddCors(options =>
+            {
+                options.AddPolicy(
+                    "AllowReactApp",
+                    policy =>
+                    {
+                        policy.WithOrigins("http://localhost:3000")
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    }
+                );
+            }
+        );
+
         services.AddScoped<IGeminiWebService>(sp =>
-        {
-            var settings = sp.GetRequiredService<IOptions<GeminiSettings>>().Value;
-            return new GeminiWebService(settings.ApiKey);
-        });
+                {
+                    var settings = sp
+                        .GetRequiredService<IOptions<GeminiSettings>>()
+                        .Value;
+                    return new GeminiWebService(settings.ApiKey);
+                }
+            );
+
     }
 }

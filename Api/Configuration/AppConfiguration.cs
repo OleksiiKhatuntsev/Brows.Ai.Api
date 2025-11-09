@@ -33,5 +33,6 @@ public static class AppConfiguration
         app.UseHttpsRedirection();
         app.UseAuthorization();
         app.MapControllers();
+        app.UseCors("AllowReactApp");
     }
 }
