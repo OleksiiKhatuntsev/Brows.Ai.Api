@@ -1,4 +1,5 @@
 using Brows.Ai.Api.Configuration;
+using Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,9 @@ ServiceConfiguration.ConfigureAppSettings(builder.Services, builder.Configuratio
 ServiceConfiguration.RegisterServices(builder.Services, builder.Configuration);
 
 var app = builder.Build();
+
+// Seed initial data
+await DbSeeder.SeedDataAsync(app.Services);
 
 app.ConfigurePipeline(builder.Configuration);
 

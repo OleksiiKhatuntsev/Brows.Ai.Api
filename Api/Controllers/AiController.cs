@@ -1,6 +1,6 @@
 using AutoGen.Core;
+using Domain.Db;
 using Domain.Interfaces.Infrastructure;
-using Domain.Promtps;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Brows.Ai.Api.Controllers;
@@ -9,7 +9,8 @@ namespace Brows.Ai.Api.Controllers;
 [Route("[controller]/[action]")]
 public class AiController(
     ILogger<AiController> logger,
-    IGeminiWebService geminiWebService)
+    IGeminiWebService geminiWebService,
+    IPromptRepository promptRepository)
     : ControllerBase
 {
     private readonly ILogger<AiController> _logger = logger;
@@ -25,12 +26,19 @@ public class AiController(
     }
 
     [HttpPost]
-    public async Task<string> GetCustomResponse([FromBody] PromptBody prompt)
+    public async Task<string> GetCustomResponse([FromBody] Prompt prompt)
     {
         var response = await geminiWebService.SendRequest(
-            prompt.Prompt,
+            prompt.Body,
             "You are a helpful assistant."
         );
         return response.GetContent();
+    }
+
+    [HttpGet(Name = "GetAllPrompts")]
+    public async Task<ActionResult<IEnumerable<Prompt>>> GetAllPrompts()
+    {
+        var prompts = await promptRepository.GetAllAsync();
+        return Ok(prompts);
     }
 }

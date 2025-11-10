@@ -1,9 +1,12 @@
-﻿namespace Brows.Ai.Api.Configuration;
-
-using Domain.Configuration;
+﻿using Domain.Configuration;
 using Domain.Interfaces.Infrastructure;
+using Infrastructure.Data;
 using Infrastructure.ExternalServices;
+using Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+
+namespace Brows.Ai.Api.Configuration;
 
 public static class ServiceConfiguration
 {
@@ -52,5 +55,11 @@ public static class ServiceConfiguration
                 }
             );
 
+        // Register DbContext with SQLite
+        services.AddDbContext<BrowsAiDbContext>(options =>
+            options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
+
+        // Register Repository
+        services.AddScoped<IPromptRepository, PromptRepository>();
     }
 }
