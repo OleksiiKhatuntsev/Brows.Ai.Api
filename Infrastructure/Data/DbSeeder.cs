@@ -1,19 +1,13 @@
 using Domain.Db;
+using Domain.Interfaces.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Data;
 
 public static class DbSeeder
 {
-    public static async Task SeedDataAsync(IServiceProvider serviceProvider)
+    public static async Task SeedAsync(IBrowsAiDbContext context)
     {
-        using var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<BrowsAiDbContext>();
-
-        // Ensure database is created
-        await context.Database.EnsureCreatedAsync();
-
         // Check if we already have data
         if (await context.Prompts.AnyAsync())
         {

@@ -1,5 +1,6 @@
 using AutoGen.Core;
 using Domain.Db;
+using Domain.Interfaces.Application;
 using Domain.Interfaces.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 

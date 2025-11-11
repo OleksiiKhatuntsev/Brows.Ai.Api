@@ -1,0 +1,144 @@
+using Domain.Db;
+using FluentAssertions;
+using Infrastructure.Data;
+using Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Xunit;
+
+namespace UnitTests.Infrastructure.Repositories;
+
+/// <summary>
+/// Unit tests for PromptRepository
+/// </summary>
+public class PromptRepositoryTests
+{
+    [Fact]
+    public async Task GetAllAsync_ShouldReturnAllPrompts()
+    {
+        // Arrange
+        await using var context = CreateInMemoryContext();
+        var repository = new PromptRepository(context);
+
+        var prompt1 = new Prompt { Id = Guid.NewGuid(), Title = "Test Prompt 1", Body = "Body 1" };
+        var prompt2 = new Prompt { Id = Guid.NewGuid(), Title = "Test Prompt 2", Body = "Body 2" };
+
+        await context.Prompts.AddRangeAsync(prompt1, prompt2);
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await repository.GetAllAsync();
+
+        // Assert
+        result.Should().HaveCount(2);
+        result.Should().Contain(prompt1);
+        result.Should().Contain(prompt2);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ShouldReturnEmptyListWhenNoPromptsExist()
+    {
+        // Arrange
+        await using var context = CreateInMemoryContext();
+        var repository = new PromptRepository(context);
+
+        // Act
+        var result = await repository.GetAllAsync();
+
+        // Assert
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_WhenPromptExists_ShouldReturnPrompt()
+    {
+        // Arrange
+        await using var context = CreateInMemoryContext();
+        var repository = new PromptRepository(context);
+
+        var promptId = Guid.NewGuid();
+        var prompt = new Prompt { Id = promptId, Title = "Test Prompt", Body = "Test Body" };
+
+        await context.Prompts.AddAsync(prompt);
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await repository.GetByIdAsync(promptId);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().Be(prompt);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_WhenPromptDoesNotExist_ShouldReturnNull()
+    {
+        // Arrange
+        await using var context = CreateInMemoryContext();
+        var repository = new PromptRepository(context);
+        var nonExistentId = Guid.NewGuid();
+
+        // Act
+        var result = await repository.GetByIdAsync(nonExistentId);
+
+        // Assert
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task AddAsync_ShouldAddPromptToDatabase()
+    {
+        // Arrange
+        await using var context = CreateInMemoryContext();
+        var repository = new PromptRepository(context);
+
+        var newPrompt = new Prompt
+        {
+            Id = Guid.NewGuid(),
+            Title = "New Prompt",
+            Body = "New Body"
+        };
+
+        // Act
+        var result = await repository.AddAsync(newPrompt);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().Be(newPrompt);
+
+        var savedPrompt = await context.Prompts.FindAsync(newPrompt.Id);
+        savedPrompt.Should().NotBeNull();
+        savedPrompt.Should().Be(newPrompt);
+    }
+
+    [Fact]
+    public async Task AddAsync_ShouldReturnAddedPrompt()
+    {
+        // Arrange
+        await using var context = CreateInMemoryContext();
+        var repository = new PromptRepository(context);
+
+        var newPrompt = new Prompt
+        {
+            Id = Guid.NewGuid(),
+            Title = "Test",
+            Body = "Body"
+        };
+
+        // Act
+        var result = await repository.AddAsync(newPrompt);
+
+        // Assert
+        result.Should().BeSameAs(newPrompt);
+        result.Id.Should().Be(newPrompt.Id);
+    }
+
+    private BrowsAiDbContext CreateInMemoryContext()
+    {
+        var options = new DbContextOptionsBuilder<BrowsAiDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+
+        return new BrowsAiDbContext(options);
+    }
+}
+

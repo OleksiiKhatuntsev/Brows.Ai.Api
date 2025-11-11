@@ -1,4 +1,6 @@
-﻿using Domain.Configuration;
+﻿using Application.Services;
+using Domain.Configuration;
+using Domain.Interfaces.Application;
 using Domain.Interfaces.Infrastructure;
 using Infrastructure.Data;
 using Infrastructure.ExternalServices;
@@ -46,18 +48,25 @@ public static class ServiceConfiguration
             }
         );
 
-        services.AddScoped<IGeminiWebService>(sp =>
-                {
-                    var settings = sp
-                        .GetRequiredService<IOptions<GeminiSettings>>()
-                        .Value;
-                    return new GeminiWebService(settings.ApiKey);
-                }
-            );
+        // Register Gemini Chat Agent Factory
+        services.AddScoped<IGeminiChatAgentFactory>(sp =>
+        {
+            var settings = sp
+                .GetRequiredService<IOptions<GeminiSettings>>()
+                .Value;
+            return new GeminiChatAgentFactory(settings.ApiKey);
+        });
+
+        // Register Gemini Web Service
+        services.AddScoped<IGeminiWebService, GeminiWebService>();
 
         // Register DbContext with SQLite
         services.AddDbContext<BrowsAiDbContext>(options =>
             options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
+
+        // Register IBrowsAiDbContext interface
+        services.AddScoped<IBrowsAiDbContext>(provider =>
+            provider.GetRequiredService<BrowsAiDbContext>());
 
         // Register Repository
         services.AddScoped<IPromptRepository, PromptRepository>();
