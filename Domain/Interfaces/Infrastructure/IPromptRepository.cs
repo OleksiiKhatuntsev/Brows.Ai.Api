@@ -7,5 +7,6 @@ public interface IPromptRepository
     Task<IEnumerable<Prompt>> GetAllAsync();
     Task<Prompt?> GetByIdAsync(Guid id);
     Task<Prompt> AddAsync(Prompt prompt);
+    Task<Prompt> UpdateAsync(Prompt prompt);
 }
 

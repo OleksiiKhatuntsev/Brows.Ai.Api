@@ -1,4 +1,6 @@
-﻿using Application.Services;
+﻿using Application.Features.GetAllPrompts;
+using Application.Mappers;
+using Application.Services;
 using Domain.Configuration;
 using Domain.Interfaces.Application;
 using Domain.Interfaces.Infrastructure;
@@ -32,6 +34,10 @@ public static class ServiceConfiguration
             });
         services.AddOpenApi();
         services.AddSwaggerGen();
+
+        // Register MediatR
+        services.AddMediatR(cfg =>
+            cfg.RegisterServicesFromAssemblyContaining<GetAllPromptsQuery>());
 
         // In your Program.cs or Startup.cs
         services.AddCors(options =>
@@ -70,5 +76,8 @@ public static class ServiceConfiguration
 
         // Register Repository
         services.AddScoped<IPromptRepository, PromptRepository>();
+
+        // Register Mappers
+        services.AddScoped<IPromptMapper, PromptMapper>();
     }
 }

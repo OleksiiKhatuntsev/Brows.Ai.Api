@@ -25,5 +25,12 @@ public class PromptRepository(BrowsAiDbContext context) : IPromptRepository
         await _context.SaveChangesAsync();
         return prompt;
     }
+
+    public async Task<Prompt> UpdateAsync(Prompt prompt)
+    {
+        _context.Prompts.Update(prompt);
+        await _context.SaveChangesAsync();
+        return prompt;
+    }
 }
 
