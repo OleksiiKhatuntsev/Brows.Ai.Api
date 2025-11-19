@@ -26,7 +26,7 @@ public class PostPromptCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WithValidModel_ShouldCreatePromptSuccessfully()
+    public async Task Handle_WithValidModel_ReturnsCreatedPrompt()
     {
         // Arrange
         var model = new PostPromptModel
@@ -68,119 +68,12 @@ public class PostPromptCommandHandlerTests
         result.Id.Should().Be(mappedEntity.Id);
         result.Title.Should().Be(model.Title);
         result.Body.Should().Be(model.Body);
-    }
-
-    [Fact]
-    public async Task Handle_ShouldCallMapperToEntityWithCorrectModel()
-    {
-        // Arrange
-        var model = new PostPromptModel
-        {
-            Title = "Test Title",
-            Body = "Test Body"
-        };
-
-        var mappedEntity = new Prompt
-        {
-            Id = Guid.NewGuid(),
-            Title = model.Title,
-            Body = model.Body
-        };
-
-        _mockMapper
-            .Setup(mapper => mapper.ToEntity(model))
-            .Returns(mappedEntity);
-
-        _mockRepository
-            .Setup(repo => repo.AddAsync(It.IsAny<Prompt>()))
-            .ReturnsAsync(mappedEntity);
-
-        var command = new PostPromptCommand(model);
-
-        // Act
-        await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
         _mockMapper.Verify(mapper => mapper.ToEntity(model), Times.Once);
-    }
-
-    [Fact]
-    public async Task Handle_ShouldCallRepositoryAddAsyncWithMappedEntity()
-    {
-        // Arrange
-        var model = new PostPromptModel
-        {
-            Title = "New Prompt",
-            Body = "New Body"
-        };
-
-        var mappedEntity = new Prompt
-        {
-            Id = Guid.NewGuid(),
-            Title = model.Title,
-            Body = model.Body
-        };
-
-        _mockMapper
-            .Setup(mapper => mapper.ToEntity(model))
-            .Returns(mappedEntity);
-
-        _mockRepository
-            .Setup(repo => repo.AddAsync(mappedEntity))
-            .ReturnsAsync(mappedEntity);
-
-        var command = new PostPromptCommand(model);
-
-        // Act
-        await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
         _mockRepository.Verify(repo => repo.AddAsync(mappedEntity), Times.Once);
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnSavedPromptFromRepository()
-    {
-        // Arrange
-        var model = new PostPromptModel
-        {
-            Title = "Test",
-            Body = "Body"
-        };
-
-        var mappedEntity = new Prompt
-        {
-            Id = Guid.NewGuid(),
-            Title = model.Title,
-            Body = model.Body
-        };
-
-        var expectedSavedPrompt = new Prompt
-        {
-            Id = mappedEntity.Id,
-            Title = mappedEntity.Title,
-            Body = mappedEntity.Body
-        };
-
-        _mockMapper
-            .Setup(mapper => mapper.ToEntity(model))
-            .Returns(mappedEntity);
-
-        _mockRepository
-            .Setup(repo => repo.AddAsync(mappedEntity))
-            .ReturnsAsync(expectedSavedPrompt);
-
-        var command = new PostPromptCommand(model);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.Should().BeSameAs(expectedSavedPrompt);
-    }
-
-    [Fact]
-    public async Task Handle_WithCancellationToken_ShouldExecuteSuccessfully()
+    public async Task Handle_WithCancellationToken_ExecutesSuccessfully()
     {
         // Arrange
         var model = new PostPromptModel
@@ -215,4 +108,3 @@ public class PostPromptCommandHandlerTests
         result.Should().BeSameAs(mappedEntity);
     }
 }
-

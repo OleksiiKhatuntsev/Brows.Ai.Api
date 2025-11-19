@@ -20,7 +20,7 @@ public class PromptMapperTests
     #region ToEntity(PostPromptModel) Tests
 
     [Fact]
-    public void ToEntity_WithPostPromptModel_ShouldGenerateNewGuid()
+    public async Task ToEntity_WithPostPromptModel_MapsAllPropertiesCorrectly()
     {
         // Arrange
         var model = new PostPromptModel
@@ -34,46 +34,12 @@ public class PromptMapperTests
 
         // Assert
         result.Id.Should().NotBe(Guid.Empty);
+        result.Title.Should().Be(model.Title);
+        result.Body.Should().Be(model.Body);
     }
 
     [Fact]
-    public void ToEntity_WithPostPromptModel_ShouldMapTitleCorrectly()
-    {
-        // Arrange
-        var expectedTitle = "My Prompt Title";
-        var model = new PostPromptModel
-        {
-            Title = expectedTitle,
-            Body = "Test Body"
-        };
-
-        // Act
-        var result = _mapper.ToEntity(model);
-
-        // Assert
-        result.Title.Should().Be(expectedTitle);
-    }
-
-    [Fact]
-    public void ToEntity_WithPostPromptModel_ShouldMapBodyCorrectly()
-    {
-        // Arrange
-        var expectedBody = "This is the prompt body";
-        var model = new PostPromptModel
-        {
-            Title = "Test Title",
-            Body = expectedBody
-        };
-
-        // Act
-        var result = _mapper.ToEntity(model);
-
-        // Assert
-        result.Body.Should().Be(expectedBody);
-    }
-
-    [Fact]
-    public void ToEntity_WithPostPromptModel_CalledMultipleTimes_ShouldGenerateDifferentGuids()
+    public void ToEntity_WithPostPromptModel_GeneratesUniqueIds()
     {
         // Arrange
         var model1 = new PostPromptModel { Title = "Title1", Body = "Body1" };
@@ -92,15 +58,15 @@ public class PromptMapperTests
     #region ToEntity(UpdatePromptModel) Tests
 
     [Fact]
-    public void ToEntity_WithUpdatePromptModel_ShouldUseProvidedId()
+    public void ToEntity_WithUpdatePromptModel_MapsAllPropertiesCorrectly()
     {
         // Arrange
         var expectedId = Guid.NewGuid();
         var model = new UpdatePromptModel
         {
             Id = expectedId,
-            Title = "Test Title",
-            Body = "Test Body"
+            Title = "Updated Title",
+            Body = "Updated Body"
         };
 
         // Act
@@ -108,48 +74,12 @@ public class PromptMapperTests
 
         // Assert
         result.Id.Should().Be(expectedId);
+        result.Title.Should().Be(model.Title);
+        result.Body.Should().Be(model.Body);
     }
 
     [Fact]
-    public void ToEntity_WithUpdatePromptModel_ShouldMapTitleCorrectly()
-    {
-        // Arrange
-        var expectedTitle = "Updated Title";
-        var model = new UpdatePromptModel
-        {
-            Id = Guid.NewGuid(),
-            Title = expectedTitle,
-            Body = "Test Body"
-        };
-
-        // Act
-        var result = _mapper.ToEntity(model);
-
-        // Assert
-        result.Title.Should().Be(expectedTitle);
-    }
-
-    [Fact]
-    public void ToEntity_WithUpdatePromptModel_ShouldMapBodyCorrectly()
-    {
-        // Arrange
-        var expectedBody = "Updated body content";
-        var model = new UpdatePromptModel
-        {
-            Id = Guid.NewGuid(),
-            Title = "Test Title",
-            Body = expectedBody
-        };
-
-        // Act
-        var result = _mapper.ToEntity(model);
-
-        // Assert
-        result.Body.Should().Be(expectedBody);
-    }
-
-    [Fact]
-    public void ToEntity_WithUpdatePromptModel_ShouldPreserveExactIdValue()
+    public void ToEntity_WithUpdatePromptModel_PreservesExactIdValue()
     {
         // Arrange
         var specificGuid = new Guid("12345678-1234-1234-1234-123456789012");
@@ -170,4 +100,3 @@ public class PromptMapperTests
 
     #endregion
 }
-

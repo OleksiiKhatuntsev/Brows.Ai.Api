@@ -22,7 +22,7 @@ public class GetAllPromptsQueryHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WhenPromptsExist_ShouldReturnAllPrompts()
+    public async Task Handle_WithExistingPrompts_ReturnsAllPrompts()
     {
         // Arrange
         var expectedPrompts = new List<Prompt>
@@ -45,10 +45,12 @@ public class GetAllPromptsQueryHandlerTests
         result.Should().NotBeNull();
         result.Should().HaveCount(3);
         result.Should().BeEquivalentTo(expectedPrompts);
+        result.Should().ContainInOrder(expectedPrompts);
+        _mockRepository.Verify(repo => repo.GetAllAsync(), Times.Once);
     }
 
     [Fact]
-    public async Task Handle_WhenNoPromptsExist_ShouldReturnEmptyList()
+    public async Task Handle_WithNoPrompts_ReturnsEmptyList()
     {
         // Arrange
         var emptyList = new List<Prompt>();
@@ -65,51 +67,6 @@ public class GetAllPromptsQueryHandlerTests
         // Assert
         result.Should().NotBeNull();
         result.Should().BeEmpty();
-    }
-
-    [Fact]
-    public async Task Handle_ShouldCallRepositoryGetAllAsyncOnce()
-    {
-        // Arrange
-        var prompts = new List<Prompt>
-        {
-            new() { Id = Guid.NewGuid(), Title = "Test", Body = "Test Body" }
-        };
-
-        _mockRepository
-            .Setup(repo => repo.GetAllAsync())
-            .ReturnsAsync(prompts);
-
-        var query = new GetAllPromptsQuery();
-
-        // Act
-        await _handler.Handle(query, CancellationToken.None);
-
-        // Assert
         _mockRepository.Verify(repo => repo.GetAllAsync(), Times.Once);
     }
-
-    [Fact]
-    public async Task Handle_WithMultiplePrompts_ShouldReturnAllInCorrectOrder()
-    {
-        // Arrange
-        var prompt1 = new Prompt { Id = Guid.NewGuid(), Title = "First", Body = "Body 1" };
-        var prompt2 = new Prompt { Id = Guid.NewGuid(), Title = "Second", Body = "Body 2" };
-        var prompt3 = new Prompt { Id = Guid.NewGuid(), Title = "Third", Body = "Body 3" };
-
-        var expectedPrompts = new List<Prompt> { prompt1, prompt2, prompt3 };
-
-        _mockRepository
-            .Setup(repo => repo.GetAllAsync())
-            .ReturnsAsync(expectedPrompts);
-
-        var query = new GetAllPromptsQuery();
-
-        // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.Should().ContainInOrder(prompt1, prompt2, prompt3);
-    }
 }
-

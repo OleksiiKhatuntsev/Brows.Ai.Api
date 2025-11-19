@@ -13,7 +13,7 @@ namespace UnitTests.Infrastructure.Repositories;
 public class PromptRepositoryTests
 {
     [Fact]
-    public async Task GetAllAsync_ShouldReturnAllPrompts()
+    public async Task GetAllAsync_WithExistingPrompts_ReturnsAllPrompts()
     {
         // Arrange
         await using var context = CreateInMemoryContext();
@@ -35,7 +35,7 @@ public class PromptRepositoryTests
     }
 
     [Fact]
-    public async Task GetAllAsync_ShouldReturnEmptyListWhenNoPromptsExist()
+    public async Task GetAllAsync_WithEmptyDatabase_ReturnsEmptyList()
     {
         // Arrange
         await using var context = CreateInMemoryContext();
@@ -49,7 +49,7 @@ public class PromptRepositoryTests
     }
 
     [Fact]
-    public async Task GetByIdAsync_WhenPromptExists_ShouldReturnPrompt()
+    public async Task GetByIdAsync_WithExistingPrompt_ReturnsPrompt()
     {
         // Arrange
         await using var context = CreateInMemoryContext();
@@ -70,7 +70,7 @@ public class PromptRepositoryTests
     }
 
     [Fact]
-    public async Task GetByIdAsync_WhenPromptDoesNotExist_ShouldReturnNull()
+    public async Task GetByIdAsync_WithNonExistentId_ReturnsNull()
     {
         // Arrange
         await using var context = CreateInMemoryContext();
@@ -85,7 +85,7 @@ public class PromptRepositoryTests
     }
 
     [Fact]
-    public async Task AddAsync_ShouldAddPromptToDatabase()
+    public async Task AddAsync_WithValidPrompt_AddsAndReturnsPrompt()
     {
         // Arrange
         await using var context = CreateInMemoryContext();
@@ -103,33 +103,12 @@ public class PromptRepositoryTests
 
         // Assert
         result.Should().NotBeNull();
-        result.Should().Be(newPrompt);
+        result.Should().BeSameAs(newPrompt);
+        result.Id.Should().Be(newPrompt.Id);
 
         var savedPrompt = await context.Prompts.FindAsync(newPrompt.Id);
         savedPrompt.Should().NotBeNull();
         savedPrompt.Should().Be(newPrompt);
-    }
-
-    [Fact]
-    public async Task AddAsync_ShouldReturnAddedPrompt()
-    {
-        // Arrange
-        await using var context = CreateInMemoryContext();
-        var repository = new PromptRepository(context);
-
-        var newPrompt = new Prompt
-        {
-            Id = Guid.NewGuid(),
-            Title = "Test",
-            Body = "Body"
-        };
-
-        // Act
-        var result = await repository.AddAsync(newPrompt);
-
-        // Assert
-        result.Should().BeSameAs(newPrompt);
-        result.Id.Should().Be(newPrompt.Id);
     }
 
     private BrowsAiDbContext CreateInMemoryContext()
@@ -141,4 +120,3 @@ public class PromptRepositoryTests
         return new BrowsAiDbContext(options);
     }
 }
-

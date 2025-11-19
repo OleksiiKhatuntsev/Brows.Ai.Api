@@ -8,12 +8,11 @@ namespace UnitTests.Infrastructure.Data;
 
 /// <summary>
 /// Tests for BrowsAiDbContext to verify database constraints and validation are enforced.
-/// These tests verify that the OnModelCreating configuration actually works at runtime.
 /// </summary>
 public class BrowsAiDbContextTests
 {
     [Fact]
-    public async Task SaveChanges_WithNullTitle_ShouldThrowValidationException()
+    public async Task SaveChangesAsync_WithNullTitle_ThrowsValidationException()
     {
         // Arrange
         await using var context = CreateInMemoryContext();
@@ -34,7 +33,7 @@ public class BrowsAiDbContextTests
     }
 
     [Fact]
-    public async Task SaveChanges_WithNullBody_ShouldThrowValidationException()
+    public async Task SaveChangesAsync_WithNullBody_ThrowsValidationException()
     {
         // Arrange
         await using var context = CreateInMemoryContext();
@@ -55,7 +54,7 @@ public class BrowsAiDbContextTests
     }
 
     [Fact]
-    public async Task SaveChanges_WithValidPrompt_ShouldSucceed()
+    public async Task SaveChangesAsync_WithValidPrompt_Succeeds()
     {
         // Arrange
         await using var context = CreateInMemoryContext();
@@ -80,7 +79,7 @@ public class BrowsAiDbContextTests
     }
 
     [Fact]
-    public async Task SaveChanges_WithDuplicateId_ShouldThrowInvalidOperationException()
+    public async Task Add_WithDuplicateId_ThrowsInvalidOperationException()
     {
         // Arrange
         await using var context = CreateInMemoryContext();
@@ -104,7 +103,6 @@ public class BrowsAiDbContextTests
         context.Prompts.Add(prompt1);
         await context.SaveChangesAsync();
 
-        // Trying to add another entity with the same ID should throw
         var act = () => context.Prompts.Add(prompt2);
 
         // Assert
@@ -113,7 +111,7 @@ public class BrowsAiDbContextTests
     }
 
     [Fact]
-    public async Task SaveChanges_WithUniqueIds_ShouldSucceed()
+    public async Task AddRange_WithUniqueIds_Succeeds()
     {
         // Arrange
         await using var context = CreateInMemoryContext();
@@ -144,7 +142,7 @@ public class BrowsAiDbContextTests
     }
 
     [Fact]
-    public async Task Prompts_Add_ShouldAddPromptToDatabase()
+    public async Task Add_WithValidPrompt_AddsToDatabase()
     {
         // Arrange
         await using var context = CreateInMemoryContext();
@@ -169,7 +167,7 @@ public class BrowsAiDbContextTests
     }
 
     [Fact]
-    public async Task Prompts_Find_ShouldRetrieveExistingPrompt()
+    public async Task Find_WithExistingId_RetrievesPrompt()
     {
         // Arrange
         await using var context = CreateInMemoryContext();
@@ -194,7 +192,7 @@ public class BrowsAiDbContextTests
     }
 
     [Fact]
-    public async Task Prompts_Update_ShouldUpdateExistingPrompt()
+    public async Task Update_WithExistingPrompt_UpdatesSuccessfully()
     {
         // Arrange
         await using var context = CreateInMemoryContext();
@@ -229,7 +227,7 @@ public class BrowsAiDbContextTests
     }
 
     [Fact]
-    public async Task Prompts_Remove_ShouldDeletePromptFromDatabase()
+    public async Task Remove_WithExistingPrompt_DeletesFromDatabase()
     {
         // Arrange
         await using var context = CreateInMemoryContext();
@@ -254,7 +252,7 @@ public class BrowsAiDbContextTests
     }
 
     [Fact]
-    public void DbContext_ShouldInitializeSuccessfully()
+    public void Constructor_WithOptions_InitializesSuccessfully()
     {
         // Arrange & Act
         var act = () => CreateInMemoryContext();
@@ -276,4 +274,3 @@ public class BrowsAiDbContextTests
         return new BrowsAiDbContext(options);
     }
 }
-

@@ -14,7 +14,21 @@ public class GeminiChatAgentFactoryTests
     private const string TestSystemMessage = "You are a helpful assistant.";
 
     [Fact]
-    public void CreateAgent_CalledMultipleTimes_ShouldReturnDifferentInstances()
+    public void CreateAgent_WithValidInput_ReturnsNewAgent()
+    {
+        // Arrange
+        var factory = new GeminiChatAgentFactory(TestApiKey);
+
+        // Act
+        var agent = factory.CreateAgent(TestSystemMessage);
+
+        // Assert
+        agent.Should().NotBeNull();
+        agent.Should().BeAssignableTo<IGeminiChatAgent>();
+    }
+
+    [Fact]
+    public void CreateAgent_CalledMultipleTimes_ReturnsUniqueInstances()
     {
         // Arrange
         var factory = new GeminiChatAgentFactory(TestApiKey);
@@ -30,7 +44,7 @@ public class GeminiChatAgentFactoryTests
     }
 
     [Fact]
-    public void CreateAgent_WithDifferentSystemMessages_ShouldReturnDifferentAgents()
+    public void CreateAgent_WithDifferentSystemMessages_ReturnsUniqueAgents()
     {
         // Arrange
         var factory = new GeminiChatAgentFactory(TestApiKey);
@@ -48,7 +62,7 @@ public class GeminiChatAgentFactoryTests
     }
 
     [Fact]
-    public void CreateAgent_WithEmptySystemMessage_ShouldReturnAgent()
+    public void CreateAgent_WithEmptySystemMessage_ReturnsAgent()
     {
         // Arrange
         var factory = new GeminiChatAgentFactory(TestApiKey);
@@ -62,7 +76,7 @@ public class GeminiChatAgentFactoryTests
     }
 
     [Fact]
-    public void Constructor_WithEmptyApiKey_ShouldCreateFactory()
+    public void Constructor_WithEmptyApiKey_CreatesFactory()
     {
         // Arrange & Act
         var factory = new GeminiChatAgentFactory(string.Empty);
@@ -71,19 +85,4 @@ public class GeminiChatAgentFactoryTests
         factory.Should().NotBeNull();
         factory.Should().BeAssignableTo<IGeminiChatAgentFactory>();
     }
-
-    [Fact]
-    public void CreateAgent_WithEmptyApiKey_ShouldStillReturnAgent()
-    {
-        // Arrange
-        var factory = new GeminiChatAgentFactory(string.Empty);
-
-        // Act
-        var agent = factory.CreateAgent(TestSystemMessage);
-
-        // Assert
-        agent.Should().NotBeNull();
-        agent.Should().BeAssignableTo<IGeminiChatAgent>();
-    }
 }
-

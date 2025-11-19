@@ -10,10 +10,10 @@ namespace UnitTests.Domain.Db;
 /// </summary>
 public class PromptTests
 {
-    #region Data Annotation Tests
+    #region Validation Tests
 
     [Fact]
-    public void Prompt_Validation_WithValidData_ShouldPass()
+    public void Validation_WithValidData_Passes()
     {
         // Arrange
         var prompt = new Prompt
@@ -34,7 +34,28 @@ public class PromptTests
     }
 
     [Fact]
-    public void Prompt_Validation_WithEmptyTitle_ShouldFail()
+    public void Validation_WithNullTitle_Fails()
+    {
+        // Arrange
+        var prompt = new Prompt
+        {
+            Id = Guid.NewGuid(),
+            Title = null!,
+            Body = "Valid Body"
+        };
+
+        // Act
+        var context = new ValidationContext(prompt);
+        var results = new List<ValidationResult>();
+        var isValid = Validator.TryValidateObject(prompt, context, results, validateAllProperties: true);
+
+        // Assert
+        isValid.Should().BeFalse();
+        results.Should().ContainSingle(r => r.MemberNames.Contains("Title"));
+    }
+
+    [Fact]
+    public void Validation_WithEmptyTitle_Fails()
     {
         // Arrange
         var prompt = new Prompt
@@ -55,7 +76,28 @@ public class PromptTests
     }
 
     [Fact]
-    public void Prompt_Validation_WithEmptyBody_ShouldFail()
+    public void Validation_WithNullBody_Fails()
+    {
+        // Arrange
+        var prompt = new Prompt
+        {
+            Id = Guid.NewGuid(),
+            Title = "Valid Title",
+            Body = null!
+        };
+
+        // Act
+        var context = new ValidationContext(prompt);
+        var results = new List<ValidationResult>();
+        var isValid = Validator.TryValidateObject(prompt, context, results, validateAllProperties: true);
+
+        // Assert
+        isValid.Should().BeFalse();
+        results.Should().ContainSingle(r => r.MemberNames.Contains("Body"));
+    }
+
+    [Fact]
+    public void Validation_WithEmptyBody_Fails()
     {
         // Arrange
         var prompt = new Prompt
@@ -76,7 +118,7 @@ public class PromptTests
     }
 
     [Fact]
-    public void Prompt_Validation_WithTitleTooLong_ShouldFail()
+    public void Validation_WithTitleExceedingMaxLength_FailsWithMessage()
     {
         // Arrange
         var prompt = new Prompt
@@ -99,7 +141,7 @@ public class PromptTests
     }
 
     [Fact]
-    public void Prompt_Validation_WithBodyTooLong_ShouldFail()
+    public void Validation_WithBodyExceedingMaxLength_FailsWithMessage()
     {
         // Arrange
         var prompt = new Prompt
@@ -121,56 +163,14 @@ public class PromptTests
             .Should().Contain("10000");
     }
 
-    [Fact]
-    public void Prompt_Validation_WithNullTitle_ShouldFail()
-    {
-        // Arrange
-        var prompt = new Prompt
-        {
-            Id = Guid.NewGuid(),
-            Title = null!,
-            Body = "Valid Body"
-        };
-
-        // Act
-        var context = new ValidationContext(prompt);
-        var results = new List<ValidationResult>();
-        var isValid = Validator.TryValidateObject(prompt, context, results, validateAllProperties: true);
-
-        // Assert
-        isValid.Should().BeFalse();
-        results.Should().ContainSingle(r => r.MemberNames.Contains("Title"));
-    }
-
-    [Fact]
-    public void Prompt_Validation_WithNullBody_ShouldFail()
-    {
-        // Arrange
-        var prompt = new Prompt
-        {
-            Id = Guid.NewGuid(),
-            Title = "Valid Title",
-            Body = null!
-        };
-
-        // Act
-        var context = new ValidationContext(prompt);
-        var results = new List<ValidationResult>();
-        var isValid = Validator.TryValidateObject(prompt, context, results, validateAllProperties: true);
-
-        // Assert
-        isValid.Should().BeFalse();
-        results.Should().ContainSingle(r => r.MemberNames.Contains("Body"));
-    }
-
     #endregion
 
     #region Model Behavior Tests
 
     [Fact]
-    public void Prompt_DefaultConstructor_ShouldGenerateNewGuid()
+    public void Constructor_WithDefaultValues_GeneratesNewGuid()
     {
-        // Act
+        // Arrange & Act
         var prompt = new Prompt();
 
         // Assert
@@ -178,9 +178,9 @@ public class PromptTests
     }
 
     [Fact]
-    public void Prompt_DefaultConstructor_ShouldHaveEmptyStrings()
+    public void Constructor_WithDefaultValues_SetsEmptyStrings()
     {
-        // Act
+        // Arrange & Act
         var prompt = new Prompt();
 
         // Assert
@@ -189,7 +189,7 @@ public class PromptTests
     }
 
     [Fact]
-    public void Prompt_WithInitializer_ShouldSetProperties()
+    public void Initializer_WithProvidedValues_SetsAllProperties()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -211,7 +211,7 @@ public class PromptTests
     }
 
     [Fact]
-    public void Prompt_RecordEquality_ShouldWorkCorrectly()
+    public void RecordEquality_WithIdenticalValues_ReturnsTrue()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -227,21 +227,33 @@ public class PromptTests
             Title = "Test Title",
             Body = "Test Body"
         };
-        var prompt3 = new Prompt
+
+        // Act & Assert
+        prompt1.Should().Be(prompt2);
+        prompt1.GetHashCode().Should().Be(prompt2.GetHashCode());
+    }
+
+    [Fact]
+    public void RecordEquality_WithDifferentValues_ReturnsFalse()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var prompt1 = new Prompt
+        {
+            Id = id,
+            Title = "Test Title",
+            Body = "Test Body"
+        };
+        var prompt2 = new Prompt
         {
             Id = id,
             Title = "Different Title",
             Body = "Test Body"
         };
 
-        // Assert - Records with same values should be equal
-        prompt1.Should().Be(prompt2);
-        prompt1.GetHashCode().Should().Be(prompt2.GetHashCode());
-
-        // Assert - Records with different values should not be equal
-        prompt1.Should().NotBe(prompt3);
+        // Act & Assert
+        prompt1.Should().NotBe(prompt2);
     }
 
     #endregion
 }
-

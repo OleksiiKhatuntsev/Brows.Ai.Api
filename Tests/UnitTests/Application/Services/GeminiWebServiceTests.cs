@@ -22,7 +22,6 @@ public class GeminiWebServiceTests
         _mockFactory = new Mock<IGeminiChatAgentFactory>();
         _fakeAgent = new FakeGeminiChatAgent();
 
-        // Setup mock factory to return fake agent
         _mockFactory
             .Setup(f => f.CreateAgent(It.IsAny<string>()))
             .Returns(_fakeAgent);
@@ -31,7 +30,7 @@ public class GeminiWebServiceTests
     }
 
     [Fact]
-    public async Task SendRequest_WithValidPromptAndSystemMessage_ShouldReturnResponse()
+    public async Task SendRequest_WithValidInput_ReturnsMessage()
     {
         // Arrange
         var prompt = "Tell me a joke";
@@ -43,24 +42,12 @@ public class GeminiWebServiceTests
         // Assert
         result.Should().NotBeNull();
         result.Should().BeAssignableTo<IMessage>();
-    }
-
-    [Fact]
-    public async Task SendRequest_ShouldUseFactoryToCreateAgent()
-    {
-        // Arrange
-        var prompt = "Test prompt";
-        var systemMessage = "Test system message";
-
-        // Act
-        await _service.SendRequest(prompt, systemMessage);
-
-        // Assert
+        result.GetContent().Should().Contain($"Fake response to: {prompt}");
         _mockFactory.Verify(f => f.CreateAgent(systemMessage), Times.Once);
     }
 
     [Fact]
-    public async Task SendRequest_WithDifferentSystemMessages_ShouldCallFactoryEachTime()
+    public async Task SendRequest_WithDifferentSystemMessages_CreatesNewAgentForEach()
     {
         // Arrange
         var prompt = "Test prompt";
@@ -77,22 +64,7 @@ public class GeminiWebServiceTests
     }
 
     [Fact]
-    public async Task SendRequest_ShouldReturnAgentResponse()
-    {
-        // Arrange
-        var prompt = "Hello";
-        var systemMessage = "You are a helpful assistant.";
-
-        // Act
-        var result = await _service.SendRequest(prompt, systemMessage);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.GetContent().Should().Contain("Fake response to: Hello");
-    }
-
-    [Fact]
-    public async Task SendRequest_WithEmptyPrompt_ShouldStillWork()
+    public async Task SendRequest_WithEmptyPrompt_ReturnsResponse()
     {
         // Arrange
         var prompt = string.Empty;
@@ -107,7 +79,7 @@ public class GeminiWebServiceTests
     }
 
     [Fact]
-    public async Task SendRequest_WithEmptySystemMessage_ShouldStillWork()
+    public async Task SendRequest_WithEmptySystemMessage_ReturnsResponse()
     {
         // Arrange
         var prompt = "Test prompt";
@@ -121,4 +93,3 @@ public class GeminiWebServiceTests
         _mockFactory.Verify(f => f.CreateAgent(string.Empty), Times.Once);
     }
 }
-

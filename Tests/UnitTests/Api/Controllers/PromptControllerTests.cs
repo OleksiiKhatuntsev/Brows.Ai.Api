@@ -29,7 +29,7 @@ public class PromptControllerTests
     #region PostPrompt Tests
 
     [Fact]
-    public async Task PostPrompt_WithValidModel_ShouldReturn201Created()
+    public async Task PostPrompt_WithValidModel_ReturnsCreatedResult()
     {
         // Arrange
         var model = new PostPromptModel
@@ -56,36 +56,7 @@ public class PromptControllerTests
         var actionResult = result.Result as CreatedAtActionResult;
         actionResult.Should().NotBeNull();
         actionResult!.StatusCode.Should().Be(201);
-    }
-
-    [Fact]
-    public async Task PostPrompt_WithValidModel_ShouldReturnCreatedAtActionWithCorrectData()
-    {
-        // Arrange
-        var model = new PostPromptModel
-        {
-            Title = "Test Prompt",
-            Body = "Test Body"
-        };
-
-        var savedPrompt = new Prompt
-        {
-            Id = Guid.NewGuid(),
-            Title = model.Title,
-            Body = model.Body
-        };
-
-        _mockMediator
-            .Setup(m => m.Send(It.IsAny<PostPromptCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(savedPrompt);
-
-        // Act
-        var result = await _controller.PostPrompt(model);
-
-        // Assert
-        var actionResult = result.Result as CreatedAtActionResult;
-        actionResult.Should().NotBeNull();
-        actionResult!.ActionName.Should().Be(nameof(_controller.GetAllPrompts));
+        actionResult.ActionName.Should().Be(nameof(_controller.GetAllPrompts));
         actionResult.RouteValues.Should().ContainKey("id");
         actionResult.RouteValues!["id"].Should().Be(savedPrompt.Id);
 
@@ -98,7 +69,7 @@ public class PromptControllerTests
     }
 
     [Fact]
-    public async Task PostPrompt_WithInvalidModelState_ShouldReturn400BadRequest()
+    public async Task PostPrompt_WithInvalidModelState_ReturnsBadRequest()
     {
         // Arrange
         var model = new PostPromptModel
@@ -124,7 +95,7 @@ public class PromptControllerTests
     #region UpdatePrompt Tests
 
     [Fact]
-    public async Task UpdatePrompt_WhenPromptExists_ShouldReturn200OK()
+    public async Task UpdatePrompt_WithExistingPrompt_ReturnsOkResult()
     {
         // Arrange
         var promptId = Guid.NewGuid();
@@ -163,7 +134,7 @@ public class PromptControllerTests
     }
 
     [Fact]
-    public async Task UpdatePrompt_WhenPromptDoesNotExist_ShouldReturn404NotFound()
+    public async Task UpdatePrompt_WithNonExistentPrompt_ReturnsNotFoundWithMessage()
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();
@@ -185,32 +156,8 @@ public class PromptControllerTests
         var actionResult = result.Result as NotFoundObjectResult;
         actionResult.Should().NotBeNull();
         actionResult!.StatusCode.Should().Be(404);
-    }
 
-    [Fact]
-    public async Task UpdatePrompt_WhenPromptDoesNotExist_ShouldReturnCorrectErrorMessage()
-    {
-        // Arrange
-        var nonExistentId = Guid.NewGuid();
-        var model = new UpdatePromptModel
-        {
-            Id = nonExistentId,
-            Title = "Title",
-            Body = "Body"
-        };
-
-        _mockMediator
-            .Setup(m => m.Send(It.IsAny<UpdatePromptCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Prompt?)null);
-
-        // Act
-        var result = await _controller.UpdatePrompt(model);
-
-        // Assert
-        var actionResult = result.Result as NotFoundObjectResult;
-        actionResult.Should().NotBeNull();
-
-        var errorObject = actionResult!.Value;
+        var errorObject = actionResult.Value;
         errorObject.Should().NotBeNull();
 
         var message = errorObject!.GetType().GetProperty("message")?.GetValue(errorObject, null) as string;
@@ -218,7 +165,7 @@ public class PromptControllerTests
     }
 
     [Fact]
-    public async Task UpdatePrompt_WithInvalidModelState_ShouldReturn400BadRequest()
+    public async Task UpdatePrompt_WithInvalidModelState_ReturnsBadRequest()
     {
         // Arrange
         var model = new UpdatePromptModel
@@ -245,7 +192,7 @@ public class PromptControllerTests
     #region GetAllPrompts Tests
 
     [Fact]
-    public async Task GetAllPrompts_WhenPromptsExist_ShouldReturn200OKWithAllPrompts()
+    public async Task GetAllPrompts_WithExistingPrompts_ReturnsOkWithAllPrompts()
     {
         // Arrange
         var prompts = new List<Prompt>
@@ -274,7 +221,7 @@ public class PromptControllerTests
     }
 
     [Fact]
-    public async Task GetAllPrompts_WhenNoPromptsExist_ShouldReturn200OKWithEmptyList()
+    public async Task GetAllPrompts_WithNoPrompts_ReturnsOkWithEmptyList()
     {
         // Arrange
         var emptyList = new List<Prompt>();
